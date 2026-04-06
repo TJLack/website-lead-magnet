@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Website Revenue Leak Detector | Key City Digital</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header>
+        <p class="eyebrow">KEY CITY DIGITAL · We Build Local Legends</p>
+        <h1>Website Revenue Leak Detector</h1>
+        <p>Find out how much revenue your website is leaking every month.</p>
+      </header>
+
+      <section class="card" id="scan-card">
+        <label for="url">Enter your website URL</label>
+        <div class="row">
+          <input id="url" type="url" placeholder="https://yourbusiness.com" />
+          <button id="scan-btn">Scan My Website</button>
+        </div>
+        <ul id="loading-steps" class="loading"></ul>
+      </section>
+
+      <section class="card hidden" id="lead-gate">
+        <h2>Unlock My Full Report</h2>
+        <p>Your scan is complete. Enter your details to view your full opportunity report.</p>
+        <div class="grid">
+          <input id="lead-name" placeholder="Name" />
+          <input id="lead-email" placeholder="Email" type="email" />
+          <input id="lead-phone" placeholder="Phone" />
+          <input id="lead-business" placeholder="Business Name" />
+          <input id="lead-city" placeholder="City" />
+          <input id="lead-budget" placeholder="Marketing budget (optional)" />
+        </div>
+        <button id="unlock-btn">Unlock My Full Report</button>
+      </section>
+
+      <section class="card hidden" id="results"></section>
+    </main>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
