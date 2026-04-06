@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { normalizeUrl } from "./modules/urlHandler.js";
+import { getProtocolFallbacks, normalizeUrl } from "./modules/urlHandler.js";
 import { crawlSite } from "./modules/crawler.js";
 import { captureHomepageScreenshot } from "./modules/screenshotService.js";
 import { analyzePages } from "./modules/analyzer.js";
@@ -14,32 +14,61 @@ const __dirname = path.dirname(__filename);
 const publicDir = path.resolve(__dirname, "../public");
 
 function json(res, statusCode, payload) {
-  res.writeHead(statusCode, { "Content-Type": "application/json" });
+  res.writeHead(statusCode, {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Methods": "POST,OPTIONS"
+  });
   res.end(JSON.stringify(payload));
 }
 
 async function handleApi(req, res) {
-  if (req.method !== "POST" || req.url !== "/api/scan") return false;
+  const requestUrl = new URL(req.url || "/", "http://localhost");
+  if (req.method === "OPTIONS" && requestUrl.pathname.startsWith("/api/")) {
+    res.writeHead(204, {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Allow-Methods": "POST,OPTIONS"
+    });
+    res.end();
+    return true;
+  }
+
+  if (req.method !== "POST" || requestUrl.pathname !== "/api/scan") return false;
 
   let body = "";
   req.on("data", (chunk) => {
     body += chunk;
+    if (body.length > 1_000_000) {
+      req.destroy(new Error("Payload too large"));
+    }
   });
 
   req.on("end", async () => {
     try {
       const parsed = JSON.parse(body || "{}");
       const targetUrl = normalizeUrl(parsed.url);
+      const candidates = getProtocolFallbacks(targetUrl);
+      let pages = [];
+      let resolvedUrl = targetUrl;
 
-      const pages = await crawlSite(targetUrl, 10, 2);
+      for (const candidateUrl of candidates) {
+        pages = await crawlSite(candidateUrl, 10, 2, 20_000);
+        if (pages.length > 0) {
+          resolvedUrl = candidateUrl;
+          break;
+        }
+      }
+
       if (pages.length === 0) {
         return json(res, 422, { error: "Unable to crawl this website. Please try another URL." });
       }
 
-      const screenshot = await captureHomepageScreenshot(targetUrl);
+      const screenshot = await captureHomepageScreenshot(resolvedUrl);
       const analysis = analyzePages(pages);
       const report = buildReport({
-        targetUrl,
+        targetUrl: resolvedUrl,
         pages,
         analysis,
         screenshot,
@@ -56,9 +85,14 @@ async function handleApi(req, res) {
 }
 
 const server = http.createServer(async (req, res) => {
+  const requestUrl = new URL(req.url || "/", "http://localhost");
+  if (req.method === "GET" && requestUrl.pathname === "/api/health") {
+    return json(res, 200, { status: "ok", timestamp: new Date().toISOString() });
+  }
+
   if (await handleApi(req, res)) return;
 
-  const requestPath = req.url === "/" ? "/index.html" : req.url;
+  const requestPath = requestUrl.pathname === "/" ? "/index.html" : requestUrl.pathname;
   const safePath = path.normalize(requestPath).replace(/^\.\.(\/|\\|$)/, "");
   const filePath = path.join(publicDir, safePath);
 

@@ -16,6 +16,21 @@ export function normalizeUrl(input) {
   return url.toString();
 }
 
+export function getProtocolFallbacks(normalizedUrl) {
+  const parsed = new URL(normalizedUrl);
+  const fallbacks = [parsed.toString()];
+
+  if (parsed.protocol === "https:") {
+    parsed.protocol = "http:";
+    fallbacks.push(parsed.toString());
+  } else if (parsed.protocol === "http:") {
+    parsed.protocol = "https:";
+    fallbacks.push(parsed.toString());
+  }
+
+  return [...new Set(fallbacks)];
+}
+
 export function isSameDomain(baseUrl, candidateUrl) {
   return new URL(baseUrl).hostname === new URL(candidateUrl).hostname;
 }

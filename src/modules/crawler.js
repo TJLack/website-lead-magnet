@@ -1,5 +1,6 @@
 import { sanitizeCrawlUrl } from "./urlHandler.js";
 import { extractPageData } from "./pageExtractor.js";
+import { requestHtml } from "./httpClient.js";
 
 const PRIORITY_KEYS = ["service", "services", "contact", "about", "faq", "review", "testimonials"];
 
@@ -18,32 +19,14 @@ function extractHrefs(html) {
   return matches;
 }
 
-async function fetchHtml(url) {
-  const res = await fetch(url, {
-    redirect: "follow",
-    headers: {
-      "user-agent": "KeyCityDigitalBot/1.0 (+https://keycitydigital.com)"
-    }
-  });
-
-  if (!res.ok) {
-    throw new Error(`Failed to fetch ${url}: ${res.status}`);
-  }
-
-  const contentType = res.headers.get("content-type") || "";
-  if (!contentType.includes("text/html")) {
-    throw new Error(`Skipped non-HTML page ${url}`);
-  }
-
-  return res.text();
-}
-
-export async function crawlSite(rootUrl, maxPages = 10, maxDepth = 2) {
+export async function crawlSite(rootUrl, maxPages = 10, maxDepth = 2, maxRuntimeMs = 20_000) {
   const queue = [{ url: rootUrl, depth: 0 }];
   const visited = new Set();
   const pages = [];
+  const startedAt = Date.now();
 
   while (queue.length > 0 && pages.length < maxPages) {
+    if (Date.now() - startedAt > maxRuntimeMs) break;
     queue.sort((a, b) => scorePriority(b.url) - scorePriority(a.url));
     const current = queue.shift();
     if (!current || visited.has(current.url) || current.depth > maxDepth) continue;
@@ -51,7 +34,23 @@ export async function crawlSite(rootUrl, maxPages = 10, maxDepth = 2) {
     visited.add(current.url);
 
     try {
-      const html = await fetchHtml(current.url);
+      let html;
+      if (typeof fetch === "function") {
+        try {
+          const res = await fetch(current.url, {
+            headers: { "user-agent": "KeyCityDigitalBot/1.1 (+https://keycitydigital.com)" },
+            redirect: "follow"
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const contentType = res.headers.get("content-type") || "";
+          if (!contentType.includes("text/html")) throw new Error("Non-HTML");
+          html = await res.text();
+        } catch {
+          html = await requestHtml(current.url);
+        }
+      } else {
+        html = await requestHtml(current.url);
+      }
       const page = extractPageData(current.url, html);
       pages.push(page);
 

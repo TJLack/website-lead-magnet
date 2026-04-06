@@ -116,19 +116,7 @@ unlockBtn.addEventListener("click", async () => {
     alert("Please complete required lead details.");
     return;
   }
-
-  const res = await fetch("/api/scan", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ url: latestReport.targetUrl, lead })
-  });
-  const fullReport = await res.json();
-  if (!res.ok) {
-    alert(fullReport.error || "Could not unlock report.");
-    return;
-  }
-
-  latestReport = fullReport;
+  latestReport.lead = lead;
   leadGate.classList.add("hidden");
-  renderResults(fullReport, false);
+  renderResults(latestReport, false);
 });

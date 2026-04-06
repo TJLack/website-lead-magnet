@@ -10,6 +10,8 @@ npm start
 
 Open `http://localhost:3000`.
 
+Health check: `GET /api/health`
+
 ## Architecture
 
 - `urlHandler` - URL normalization and domain-safe filtering
