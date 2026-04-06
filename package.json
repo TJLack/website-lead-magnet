@@ -1,0 +1,12 @@
+{
+  "name": "website-revenue-leak-detector",
+  "version": "1.0.0",
+  "description": "Key City Digital lead magnet analyzer",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "check": "node --check src/server.js"
+  }
+}

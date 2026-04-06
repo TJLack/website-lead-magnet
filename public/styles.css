@@ -1,0 +1,139 @@
+:root {
+  --deep-blue: #0a2540;
+  --electric-blue: #1e90ff;
+  --gold: #d4af37;
+  --black: #000;
+  --text: #eaf2ff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: radial-gradient(circle at top, #0f3459, #050a14 45%);
+  color: var(--text);
+}
+
+.app {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.eyebrow {
+  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+  color: #9ac8ff;
+}
+
+h1 {
+  font-size: clamp(1.8rem, 5vw, 3rem);
+  margin: 0.2rem 0;
+}
+
+.card {
+  background: rgba(10, 37, 64, 0.86);
+  border: 1px solid rgba(30, 144, 255, 0.35);
+  border-radius: 16px;
+  padding: 16px;
+  margin-top: 18px;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+}
+
+input {
+  width: 100%;
+  background: #091420;
+  color: var(--text);
+  border: 1px solid #274f75;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+button {
+  border: none;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-weight: 700;
+  cursor: pointer;
+  background: linear-gradient(120deg, var(--electric-blue), #56b0ff);
+  color: #00101f;
+}
+
+button:hover {
+  filter: brightness(1.05);
+}
+
+.hidden {
+  display: none;
+}
+
+.loading {
+  margin-top: 12px;
+  padding-left: 18px;
+  color: #abd3ff;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.revenue {
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  padding: 14px;
+  border-radius: 12px;
+  background: rgba(212, 175, 55, 0.08);
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.metric {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(30, 144, 255, 0.24);
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.book {
+  display: inline-block;
+  margin-top: 10px;
+  text-decoration: none;
+  color: #081c31;
+  background: var(--gold);
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-weight: 800;
+}
+
+.blur {
+  filter: blur(4px);
+  user-select: none;
+}
+
+@media (max-width: 720px) {
+  .row,
+  .grid,
+  .metric-grid {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+}
